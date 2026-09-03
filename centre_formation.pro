@@ -9,6 +9,7 @@ SOURCES += \
     formateurdao.cpp \
     coursdao.cpp \
     formateurdialog.cpp \
+    coursdialog.cpp \
     formateurwidget.cpp \
     courswidget.cpp \
     mainwindow.cpp
@@ -16,9 +17,11 @@ SOURCES += \
 HEADERS += \
     database.h \
     formateur.h \
+    cours.h \
     formateurdao.h \
     coursdao.h \
     formateurdialog.h \
+    coursdialog.h \
     formateurwidget.h \
     courswidget.h \
     mainwindow.h
