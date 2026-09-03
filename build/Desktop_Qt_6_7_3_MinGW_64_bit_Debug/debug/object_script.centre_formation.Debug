@@ -1,0 +1,12 @@
+debug/main.o
+debug/database.o
+debug/formateurdao.o
+debug/coursdao.o
+debug/formateurdialog.o
+debug/formateurwidget.o
+debug/courswidget.o
+debug/mainwindow.o
+debug/moc_formateurdialog.o
+debug/moc_formateurwidget.o
+debug/moc_courswidget.o
+debug/moc_mainwindow.o
