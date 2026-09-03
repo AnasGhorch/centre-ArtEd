@@ -67,3 +67,9 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+build/
+*.o
+*.exe
+*.pro.user
+Makefile*
