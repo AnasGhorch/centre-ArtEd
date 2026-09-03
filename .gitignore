@@ -1,75 +1,52 @@
-# Prerequisites
-*.d
+# ========== Qt / qmake ==========
+build/
+build-*/
+*.pro.user
+*.pro.user.*
+.qtcreator/
+*.autosave
 
-# Compiled Object files
-*.slo
-*.lo
+# Fichiers générés par qmake / moc / uic / rcc
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+Makefile
+Makefile.*
+object_script.*.Release
+object_script.*.Debug
+.qmake.stash
+
+# ========== Binaires & objets compilés ==========
+*.exe
+*.dll
 *.o
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-*.so.*
-
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
 *.lib
+*.so
+*.dylib
 
-# Executables
-*.exe
-*.out
-*.app
+# ========== IDE / éditeurs ==========
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Build directories
-build/
-Build/
-build-*/
-
-# CMake generated files
+# ========== CMake (si utilisé plus tard) ==========
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
-Makefile
-install_manifest.txt
 compile_commands.json
 
-# Temporary files
-*.tmp
+# ========== Divers ==========
 *.log
+*.tmp
 *.bak
-*.swp
+.DS_Store
+Thumbs.db
 
-# vcpkg
-vcpkg_installed/
-
-# debug information files
-*.dwo
-
-# test output & cache
-Testing/
-.cache/
-
-build/
-*.o
-*.exe
-*.pro.user
-Makefile*
+# Ne pas versionner les mots de passe / config locale Oracle
+*.env
+database_local.h
