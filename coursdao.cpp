@@ -24,7 +24,6 @@ Cours CoursDAO::lireLigne(QSqlQuery &query) const
     c.salle = query.value(10).toString();
     c.statut = query.value(11).toString();
     c.idFormateur = query.value(12).toInt();
-    // prenom + nom du formateur (colonnes 13 et 14 du JOIN)
     c.nomFormateur = query.value(13).toString() + QStringLiteral(" ") + query.value(14).toString();
     return c;
 }
@@ -41,7 +40,6 @@ QList<Cours> CoursDAO::listerTous()
         return liste;
 
     QSqlQuery query(QSqlDatabase::database(CONN_COURS));
-    // JOIN pour afficher le nom du formateur, pas seulement l'id
     query.prepare(
         "SELECT c.id_cours, c.titre, c.description, c.discipline_artistique, c.niveau, "
         "c.duree_heures, c.date_debut, c.date_fin, c.tarif, c.capacite_max, c.salle, c.statut, "
@@ -57,6 +55,102 @@ QList<Cours> CoursDAO::listerTous()
     while (query.next())
         liste.append(lireLigne(query));
     return liste;
+}
+
+QList<Cours> CoursDAO::filtrer(const QString &discipline,
+                               const QString &niveau,
+                               const QString &statut,
+                               const QDate &dateMin,
+                               const QDate &dateMax,
+                               double tarifMin,
+                               double tarifMax)
+{
+    QList<Cours> liste;
+    if (!Database::estOuverte())
+        return liste;
+
+    QString sql =
+        "SELECT c.id_cours, c.titre, c.description, c.discipline_artistique, c.niveau, "
+        "c.duree_heures, c.date_debut, c.date_fin, c.tarif, c.capacite_max, c.salle, c.statut, "
+        "c.id_formateur, f.prenom, f.nom "
+        "FROM COURS c "
+        "JOIN FORMATEUR f ON c.id_formateur = f.id_formateur "
+        "WHERE 1=1";
+
+    if (!discipline.isEmpty())
+        sql += " AND c.discipline_artistique = ?";
+    if (!niveau.isEmpty())
+        sql += " AND c.niveau = ?";
+    if (!statut.isEmpty())
+        sql += " AND c.statut = ?";
+    if (dateMin.isValid())
+        sql += " AND c.date_debut >= ?";
+    if (dateMax.isValid())
+        sql += " AND c.date_fin <= ?";
+    if (tarifMin >= 0)
+        sql += " AND c.tarif >= ?";
+    if (tarifMax >= 0)
+        sql += " AND c.tarif <= ?";
+
+    sql += " ORDER BY c.id_cours";
+
+    QSqlQuery query(QSqlDatabase::database(CONN_COURS));
+    query.prepare(sql);
+
+    if (!discipline.isEmpty())
+        query.addBindValue(discipline);
+    if (!niveau.isEmpty())
+        query.addBindValue(niveau);
+    if (!statut.isEmpty())
+        query.addBindValue(statut);
+    if (dateMin.isValid())
+        query.addBindValue(dateMin);
+    if (dateMax.isValid())
+        query.addBindValue(dateMax);
+    if (tarifMin >= 0)
+        query.addBindValue(tarifMin);
+    if (tarifMax >= 0)
+        query.addBindValue(tarifMax);
+
+    if (!query.exec()) {
+        setErreur(query.lastError().text());
+        return liste;
+    }
+    while (query.next())
+        liste.append(lireLigne(query));
+    return liste;
+}
+
+QMap<QString, int> CoursDAO::compterParDiscipline()
+{
+    QMap<QString, int> map;
+    if (!Database::estOuverte())
+        return map;
+
+    QSqlQuery query(QSqlDatabase::database(CONN_COURS));
+    if (!query.exec(
+            "SELECT NVL(discipline_artistique, 'Non renseigné'), COUNT(*) "
+            "FROM COURS GROUP BY discipline_artistique ORDER BY COUNT(*) DESC"))
+        return map;
+    while (query.next())
+        map[query.value(0).toString()] = query.value(1).toInt();
+    return map;
+}
+
+QMap<QString, double> CoursDAO::revenuParDiscipline()
+{
+    QMap<QString, double> map;
+    if (!Database::estOuverte())
+        return map;
+
+    QSqlQuery query(QSqlDatabase::database(CONN_COURS));
+    if (!query.exec(
+            "SELECT NVL(discipline_artistique, 'Non renseigné'), NVL(SUM(tarif), 0) "
+            "FROM COURS GROUP BY discipline_artistique ORDER BY SUM(tarif) DESC"))
+        return map;
+    while (query.next())
+        map[query.value(0).toString()] = query.value(1).toDouble();
+    return map;
 }
 
 bool CoursDAO::ajouter(const Cours &c, QString *messageErreur)

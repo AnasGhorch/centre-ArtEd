@@ -12,6 +12,9 @@ SOURCES += \
     coursdialog.cpp \
     formateurwidget.cpp \
     courswidget.cpp \
+    statistiqueswidget.cpp \
+    simplecharts.cpp \
+    courspdf.cpp \
     mainwindow.cpp
 
 HEADERS += \
@@ -24,4 +27,9 @@ HEADERS += \
     coursdialog.h \
     formateurwidget.h \
     courswidget.h \
+    statistiqueswidget.h \
+    simplecharts.h \
+    courspdf.h \
     mainwindow.h
+
+RESOURCES += resources.qrc

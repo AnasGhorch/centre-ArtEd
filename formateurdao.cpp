@@ -49,13 +49,96 @@ QList<Formateur> FormateurDAO::listerTous()
     return liste;
 }
 
+Formateur FormateurDAO::trouverParId(int idFormateur)
+{
+    Formateur f;
+    if (!Database::estOuverte())
+        return f;
+
+    QSqlQuery query(QSqlDatabase::database(CONN));
+    query.prepare(
+        "SELECT id_formateur, nom, prenom, email, telephone, discipline, "
+        "date_embauche, statut, annees_experience "
+        "FROM FORMATEUR WHERE id_formateur=?");
+    query.addBindValue(idFormateur);
+    if (query.exec() && query.next())
+        f = lireLigne(query);
+    return f;
+}
+
+QList<Formateur> FormateurDAO::filtrer(const QString &nom,
+                                       const QString &discipline,
+                                       const QString &statut,
+                                       int expMin,
+                                       int expMax)
+{
+    QList<Formateur> liste;
+    if (!Database::estOuverte())
+        return liste;
+
+    // Une seule requête préparée : on ajoute les clauses seulement si le filtre est actif
+    QString sql =
+        "SELECT id_formateur, nom, prenom, email, telephone, discipline, "
+        "date_embauche, statut, annees_experience FROM FORMATEUR WHERE 1=1";
+
+    if (!nom.isEmpty())
+        sql += " AND UPPER(nom) LIKE UPPER(?)";
+    if (!discipline.isEmpty())
+        sql += " AND discipline = ?";
+    if (!statut.isEmpty())
+        sql += " AND statut = ?";
+    if (expMin >= 0)
+        sql += " AND annees_experience >= ?";
+    if (expMax >= 0)
+        sql += " AND annees_experience <= ?";
+
+    sql += " ORDER BY id_formateur";
+
+    QSqlQuery query(QSqlDatabase::database(CONN));
+    query.prepare(sql);
+
+    if (!nom.isEmpty())
+        query.addBindValue(QStringLiteral("%") + nom + QStringLiteral("%"));
+    if (!discipline.isEmpty())
+        query.addBindValue(discipline);
+    if (!statut.isEmpty())
+        query.addBindValue(statut);
+    if (expMin >= 0)
+        query.addBindValue(expMin);
+    if (expMax >= 0)
+        query.addBindValue(expMax);
+
+    if (!query.exec()) {
+        setErreur(query.lastError().text());
+        return liste;
+    }
+    while (query.next())
+        liste.append(lireLigne(query));
+    return liste;
+}
+
+QMap<QString, int> FormateurDAO::compterParDiscipline()
+{
+    QMap<QString, int> map;
+    if (!Database::estOuverte())
+        return map;
+
+    QSqlQuery query(QSqlDatabase::database(CONN));
+    if (!query.exec(
+            "SELECT NVL(discipline, 'Non renseigné'), COUNT(*) "
+            "FROM FORMATEUR GROUP BY discipline ORDER BY COUNT(*) DESC"))
+        return map;
+    while (query.next())
+        map[query.value(0).toString()] = query.value(1).toInt();
+    return map;
+}
+
 bool FormateurDAO::ajouter(const Formateur &f, QString *messageErreur)
 {
     if (!Database::estOuverte())
         return false;
 
     QSqlQuery query(QSqlDatabase::database(CONN));
-    // id_formateur généré par la séquence Oracle seq_formateur
     query.prepare(
         "INSERT INTO FORMATEUR (id_formateur, nom, prenom, email, telephone, "
         "discipline, date_embauche, statut, annees_experience) "

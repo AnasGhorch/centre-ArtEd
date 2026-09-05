@@ -4,6 +4,8 @@
 #include <QMainWindow>
 
 class FormateurWidget;
+class CoursWidget;
+class StatistiquesWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -13,6 +15,8 @@ public:
 
 private:
     FormateurWidget *m_formateurWidget = nullptr;
+    CoursWidget *m_coursWidget = nullptr;
+    StatistiquesWidget *m_statsWidget = nullptr;
 };
 
 #endif // MAINWINDOW_H
